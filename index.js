@@ -7,12 +7,14 @@ const {
   ActionRowBuilder,
   EmbedBuilder,
   Events,
-  Collection
+  Collection,
+  REST,
+  Routes
 } = require("discord.js");
 const fs = require("fs");
 require("dotenv").config();
 
-// Keep-alive server for Railway
+// Keep-alive server for Railway / Render
 const express = require("express");
 const app = express();
 app.get("/", (req, res) => res.send("Bot is running!"));
@@ -31,6 +33,7 @@ for (const file of commandFiles) {
 
 client.once("ready", () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
+  registerCommands(); // Auto-register slash commands on bot start
 });
 
 client.on(Events.InteractionCreate, async interaction => {
@@ -69,3 +72,26 @@ client.on(Events.InteractionCreate, async interaction => {
 });
 
 client.login(process.env.DISCORD_TOKEN);
+
+// Register slash commands when the bot starts
+async function registerCommands() {
+  const commands = [];
+  const commandFiles = fs.readdirSync("./commands").filter(file => file.endsWith(".js"));
+  for (const file of commandFiles) {
+    const command = require(`./commands/${file}`);
+    commands.push(command.data.toJSON());
+  }
+
+  const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
+
+  try {
+    console.log("Registering slash commands...");
+    await rest.put(
+      Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
+      { body: commands }
+    );
+    console.log("✅ Slash commands registered successfully.");
+  } catch (err) {
+    console.error("Slash command registration failed:", err);
+  }
+}
