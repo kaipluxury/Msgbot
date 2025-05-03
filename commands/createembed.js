@@ -21,7 +21,7 @@ module.exports = {
       ["embedDesc", "Description", TextInputStyle.Paragraph],
       ["embedImage", "Image URL (optional)", TextInputStyle.Short],
       ["embedThumb", "Thumbnail URL (optional)", TextInputStyle.Short],
-      ["embedFooter", "Footer Text (optional)", TextInputStyle.Short]
+      ["embedColor", "Hex Color (e.g. #ff0000)", TextInputStyle.Short]
     ].map(([id, label, style]) =>
       new ActionRowBuilder().addComponents(
         new TextInputBuilder()
