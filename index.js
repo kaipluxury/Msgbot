@@ -33,11 +33,11 @@ for (const file of commandFiles) {
 
 client.once("ready", () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
-  registerCommands(); // Auto-register slash commands
+  registerCommands();
 });
 
 client.on(Events.InteractionCreate, async interaction => {
-  // Handle slash commands
+  // Slash command handler
   if (interaction.isChatInputCommand()) {
     const command = client.commands.get(interaction.commandName);
     if (command) {
@@ -50,7 +50,7 @@ client.on(Events.InteractionCreate, async interaction => {
     }
   }
 
-  // Handle modal submission
+  // Modal submission handler
   if (interaction.isModalSubmit() && interaction.customId === "embedModal") {
     try {
       const title = interaction.fields.getTextInputValue("embedTitle");
@@ -58,9 +58,19 @@ client.on(Events.InteractionCreate, async interaction => {
       const image = interaction.fields.getTextInputValue("embedImage");
       const thumb = interaction.fields.getTextInputValue("embedThumb");
       const footer = interaction.fields.getTextInputValue("embedFooter");
-      const color = interaction.fields.getTextInputValue("embedColor") || "#3498db";
 
-      // Validate length
+      // Safe custom color handling
+      let color = "#3498db"; // default color
+      try {
+        const colorInput = interaction.fields.getTextInputValue("embedColor");
+        if (colorInput && /^#?[0-9A-Fa-f]{6}$/.test(colorInput)) {
+          color = colorInput.startsWith("#") ? colorInput : `#${colorInput}`;
+        }
+      } catch (e) {
+        console.log("embedColor not provided — using default.");
+      }
+
+      // Check total character length
       const totalLength = (title?.length || 0) + (description?.length || 0) + (footer?.length || 0);
       if (totalLength > 5900) {
         return await interaction.reply({
@@ -77,7 +87,11 @@ client.on(Events.InteractionCreate, async interaction => {
 
       if (image) embed.setImage(image);
       if (thumb) embed.setThumbnail(thumb);
-      if (footer) embed.setFooter({ text: footer });
+
+      // Always include "Made by Kai" in footer
+      embed.setFooter({
+        text: footer ? `${footer} • Made by Kai` : "Made by Kai"
+      });
 
       await interaction.reply({ embeds: [embed] });
     } catch (err) {
@@ -92,7 +106,7 @@ client.on(Events.InteractionCreate, async interaction => {
 
 client.login(process.env.DISCORD_TOKEN);
 
-// Register slash commands on startup
+// Register slash commands
 async function registerCommands() {
   const commands = [];
   const commandFiles = fs.readdirSync("./commands").filter(file => file.endsWith(".js"));
