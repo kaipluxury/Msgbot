@@ -45,7 +45,10 @@ client.on(Events.InteractionCreate, async interaction => {
         await command.execute(interaction);
       } catch (error) {
         console.error("Command execution failed:", error);
-        await interaction.reply({ content: "Error executing command", ephemeral: true });
+        await interaction.reply({
+          content: "Error executing command",
+          flags: 64 // ephemeral
+        });
       }
     }
   }
@@ -75,7 +78,7 @@ client.on(Events.InteractionCreate, async interaction => {
       if (totalLength > 5900) {
         return await interaction.reply({
           content: "Embed too long. Reduce title, description, or footer.",
-          ephemeral: true,
+          flags: 64
         });
       }
 
@@ -88,17 +91,17 @@ client.on(Events.InteractionCreate, async interaction => {
       if (image) embed.setImage(image);
       if (thumb) embed.setThumbnail(thumb);
 
-      // Always include "Made by Kai" in footer
+      // Footer always shows "Made by Kai"
       embed.setFooter({
         text: footer ? `${footer} • Made by Kai` : "Made by Kai"
       });
 
       await interaction.reply({ embeds: [embed] });
     } catch (err) {
-      console.error("Embed creation failed:", err);
+      console.error("Embed creation failed:", err.stack || err.message || err);
       await interaction.reply({
         content: "Something went wrong while creating the embed.",
-        ephemeral: true,
+        flags: 64
       });
     }
   }
