@@ -37,6 +37,10 @@ client.once("ready", () => {
 
 client.on(Events.InteractionCreate, async interaction => {
   if (interaction.isChatInputCommand()) {
+    if (!interaction.member.roles.cache.has("1356278128200384552")) {
+      return interaction.reply({ content: "❌ You don't have permission to use this command.", ephemeral: true });
+    }
+
     const command = client.commands.get(interaction.commandName);
     if (command) {
       try {
@@ -49,6 +53,10 @@ client.on(Events.InteractionCreate, async interaction => {
   }
 
   if (interaction.isModalSubmit() && interaction.customId === "embedModal") {
+    if (!interaction.member.roles.cache.has("1356278128200384552")) {
+      return interaction.reply({ content: "❌ You don't have permission to submit this modal.", ephemeral: true });
+    }
+
     try {
       const title = interaction.fields.getTextInputValue("embedTitle");
       const description = interaction.fields.getTextInputValue("embedDesc");
